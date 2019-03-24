@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.PersonMapper">
+    <!-- 声明二级缓存-->
+    <cache/>
+    <select id="selectById" resultType="Person" parameterType="int" useCache="false">
+      select * from Person where id = #{id}
+    </select>
+    <!--插入-->
+    <insert id="insertPerson" parameterType="Person">
+        insert  into person values (#{id},#{name},#{age},#{sex})
+    </insert>
+    <!--删除-->
+    <delete id="deletePerson" parameterType="int">
+      DELETE from person WHERE id=#{id}
+    </delete>
+    <!--更新-->
+    <update id="updatePerson" parameterType="Person">
+        update person set pesonName=#{name},age=#{age} where id=#{id}
+    </update>
+    <!--查所有-->
+    <select id="selectAll" resultMap="withConvertSelectAll" >
+       SELECT * from person
+    </select>
+    <resultMap id="withConvertSelectAll" type="Person">
+        <id property="id" column="id"></id>
+        <result property="name" column="pesonName"></result>
+        <result property="age" column="age"></result>
+        <result property="sex" column="sex" javaType="Boolean" jdbcType="INTEGER"></result>
+    </resultMap>
+
+    <!--${}的使用-->
+    <select id="selectByColumn" resultMap="withConvertSelectAll" parameterType="String">
+        select * from person order by (${value})
+    </select>
+    <!--使用${}模糊查询-->
+    <select id="likeSelectWithMap" parameterType="HashMap" resultMap="withConvertSelectAll">
+        select * from person  WHERE pesonName LIKE '%${name}%' or age = #{age}
+    </select>
+    <!--返回为Hashmap-->
+    <select id="selectByIdReMap" resultType="HashMap">
+        select  pesonName name,age userage from person where  id = 3
+    </select>
+    <!--当java对象的属性名和jdbc表的列名不一样的是，处理使用resultMap之外的另外一种方法-->
+    <select id="selectByAge" resultType="Person">
+        select id son,pesonName name from person where age>23
+    </select>
+    <!---使用if   where标签-->
+   <select id="selectByAAndNameWithIf" parameterType="HashMap" resultType="Person">
+        select * from person
+       <where>
+           <if test="name!=null and name!=''">
+               pesonName=#{name}
+           </if>
+           <if test="age!=null  and age>0">
+               and  age=#{age}
+           </if>
+       </where>
+
+    </select>
+
+    <!--foreach的使用-->
+    <!--foreach  对象属性-->
+    <select id="selectByForeach" resultType="Person" parameterType="Grade">
+        select * name from person
+        <where>
+            <foreach collection="persons" open="id in (" close=")" separator="," item="person">
+                #{person}
+            </foreach>
+        </where>
+    </select>
+
+</mapper>
